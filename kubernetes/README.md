@@ -9,6 +9,7 @@
 
 ### share
 * [kubernetes](share/kubernetes.md)
+* [zjvis](share/zjvis.md)
 
 ### install
 * [k8s-1.25.6](install/k8s_1.25.6/README.md)
