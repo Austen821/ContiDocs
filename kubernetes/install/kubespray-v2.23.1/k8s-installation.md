@@ -1,12 +1,12 @@
-## kubernetes_230926
+# k8s-installation
 
-### prepare
+## prepare
 1. prepare 3 nodes with `Fedora 38`
     * master: 192.168.11.139(配置工作节点的免密登录)
     * worker1: 192.168.11.140
     * worker2: 192.168.11.141
 
-### installation
+## installation
 1. reference: [kubespray](https://github.com/kubernetes-sigs/kubespray)
 2. configure repositories
     * remove all repo configuration

@@ -2,7 +2,7 @@
 
 ## installation
 1. prepare [ingress-nginx.values.yaml](resources/ingress-nginx.values.yaml.md)
-2. prepare images at every node
+2. prepare images
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p ${DOCKER_IMAGE_PATH}
       BASE_URL="https://resource.cnconti.cc:32443/docker-images"
@@ -19,6 +19,12 @@
           fi
           docker image load -i $IMAGE_FILE && rm -f $IMAGE_FILE
       done
+      for IMAGE in "k8s.gcr.io/ingress-nginx/controller:v1.0.3" \
+          "k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0" \
+          "k8s.gcr.io/defaultbackend-amd64:1.5"
+      do
+          kind load docker-image ${IMAGE}
+      done
       ```
 3. install `ingress-nginx` by helm
     * ```shell
@@ -26,7 +32,7 @@
           --create-namespace --namespace basic-components \
           my-ingress-nginx \
           https://resource.cnconti.cc:32443/charts/kubernetes.github.io/ingress-nginx/ingress-nginx-4.0.5.tgz \
-          --values ingress.nginx.values.yaml \
+          --values ingress-nginx.values.yaml \
           --atomic
       ```
 
@@ -35,4 +41,3 @@
     * ```shell
       helm -n basic-components uninstall my-ingress-nginx
       ```
-
