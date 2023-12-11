@@ -16,8 +16,13 @@
 * [kubespray-230926](install/kubespray-230926/README.md)
 * [kubespray-offline-231009](install/kubespray-offline-231009/README.md)
 * [nebula-231129](install/nebula-231129/README.md)
+* [nebula-231208-kubeadm](install/nebula-231208/README.md)
 * [simulation-231121](install/simulation-231121/README.md)
 * [simulation-231129-kubeadm](install/simulation-231129/README.md)
+* [kubeadm-1.23.3](install/kubeadm-1.23.3/README.md)
+* [Kop-1.25.6](install)
+
+
 
 ## other
 * [kubernetes binary tools](binary_tools.md)
