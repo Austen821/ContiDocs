@@ -17,17 +17,14 @@
 * test docker registry
 
 ## precondition
-* [create a kubernetes cluster](/kubernetes/create.local.cluster.with.kind.md)
-    + local_kind_cluster need 3 node
-* [installed ingress-nginx](/kubernetes/basic%20components/ingress.nginx.md)
-* [installed cert-manager](/kubernetes/basic%20components/cert.manager.md)
+* [kind-cluster](/kubernetes/kind-cluster.md)
 
-## do it
-1. prepare images
+## operation
+1. prepare [purelb.values.yaml](resources/purelb.values.yaml.md)
+2. prepare images
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p ${DOCKER_IMAGE_PATH}
-      BASE_URL="https://resource.cnconti.cc/docker-images"
-      # BASE_URL="https://resource-ops-dev.lab.zjvis.net:32443/docker-images"
+      BASE_URL="https://resource.cnconti.cc:32443/docker-images"
       for IMAGE in "docker.io_purelb_allocator_v0.6.4.dim" \
           "docker.io_purelb_lbnodeagent_v0.6.4.dim"
       do
@@ -49,28 +46,26 @@
               && docker image rm $DOCKER_TARGET_IMAGE
       done
       ```
-2. prepare [purelb.values.yaml](resources/purelb.values.yaml.md)
-3. install by helm
-    *  NOTE: `https://resource-ops-dev.lab.zjvis.net/charts/others/purelb-v0.6.4.tgz`
+4. install `purelb` by helm
     * ```shell
       helm install \
           --create-namespace --namespace basic-components \
           my-purelb \
-          https://resource.cnconti.cc/charts/purelb-v0.6.4.tgz \
+          https://resource.cnconti.cc:32443/charts/other/purelb-v0.6.4.tgz \
           --values purelb.values.yaml \
           --atomic
       ```
-4. prepare [purelb.layer2-ippool.servicegroups.yaml](resources/purelb.layer2-ippool.servicegroups.yaml.md)
-5. create `servicegroups`
+5. prepare [purelb.layer2-ippool.servicegroups.yaml](resources/purelb.layer2-ippool.servicegroups.yaml.md)
+6. create ServiceGroups `purelb-layer2-ippool`
     * ```shell
       kubectl -n basic-components apply -f purelb.layer2-ippool.servicegroups.yaml
       ```
 
 ## test
 1. test `purelb`
-    * prepare [purelb.test.resource.yaml](resources/purelb.test.resource.yaml.md)
+    * prepare [purelb-test.resource.yaml](resources/purelb-test.resource.yaml.md)
     * ```shell
-      kubectl -n test apply -f purelb.test.resource.yaml
+      kubectl -n test apply -f purelb-test.resource.yaml
       ```
 2. check services
     * ```shell
@@ -78,7 +73,7 @@
       ```
 
 ## uninstall
-1. delete servicegroups `purelb-layer2-ippool`
+1. delete ServiceGroups `purelb-layer2-ippool`
     * ```shell
       kubectl -n basic-components delete servicegroups purelb-layer2-ippool
       ```

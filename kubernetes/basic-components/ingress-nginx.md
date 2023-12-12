@@ -5,18 +5,15 @@
 * create a kubernetes cluster by kind
 * setup ingress-nginx
 
-## conceptions
-* none
-
 ## precondition
-* [kind_cluster](/kubernetes/kind-cluster.md)
+* [kind-cluster](/kubernetes/kind-cluster.md)
 
 ## operation
-1. prepare [ingress.nginx.values.yaml](resources/ingress.nginx.values.yaml.md)
-2. prepare images
+1. prepare [ingress-nginx.values.yaml](resources/ingress-nginx.values.yaml.md)
+3. prepare images
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p ${DOCKER_IMAGE_PATH}
-      BASE_URL="https://resource.cnconti.cc/docker-images"
+      BASE_URL="https://resource.cnconti.cc:32443/docker-images"
       # BASE_URL="https://resource.static.zjvis.net/docker-images"
       for IMAGE in "k8s.gcr.io_ingress-nginx_controller_v1.0.3.dim" \
           "k8s.gcr.io_ingress-nginx_kube-webhook-certgen_v1.0.dim" \
@@ -43,41 +40,38 @@
               && docker image rm $DOCKER_TARGET_IMAGE
       done
       ```
-3. install `ingress nginx` by helm
-    * NOTE: `https://resource.static.zjvis.net/charts/kubernetes.github.io/ingress-nginx/ingress-nginx-4.0.5.tgz`
+4. install `ingress-nginx` by helm
     * ```shell
       helm install \
           --create-namespace --namespace basic-components \
           my-ingress-nginx \
-          https://resource.cnconti.cc/charts/kubernetes.github.io/ingress-nginx/ingress-nginx-4.0.5.tgz \
-          --values ingress.nginx.values.yaml \
+          https://resource.cnconti.cc:32443/charts/kubernetes.github.io/ingress-nginx/ingress-nginx-4.0.5.tgz \
+          --values ingress-nginx.values.yaml \
           --atomic
       ```
 
 ## test
-1. prepare `test` namespace
+1. prepare [nginx.values.yaml](resources/nginx.values.yaml) as file `/tmp/nginx.values.yaml`
+2. install `nginx` by helm
     * ```shell
-      kubectl get namespace test > /dev/null 2>&1 || kubectl create namespace test
+      helm install \
+          --create-namespace --namespace test \
+          my-nginx \
+          https://resource.cnconti.cc:32443/charts/charts.bitnami.com/bitnami/nginx-9.5.7.tgz  \
+          --values nginx.values.yaml \
+          --atomic
       ```
-2. install nginx service
-    * prepare [nginx.values.yaml](resources/nginx.values.yaml.md)
-    * install `nginx`
-        + ```shell
-          helm install \
-              --create-namespace --namespace test \
-              my-nginx \
-              https://resource.cnconti.cc/charts/charts.bitnami.com/bitnami/nginx-9.5.7.tgz  \
-              --values nginx.values.yaml \
-              --atomic
-          ```
 3. check connection
     + ```shell
       curl --header 'Host: my-nginx.local' http://localhost
       ```
+4. uninstall `my-nginx`
+   * ```shell
+      helm -n test uninstall my-nginx && kubectl delte namespace test
+      ```
 
 ## uninstall
-1. uninstall `my-nginx`
+1. uninstall `my-ingress-nginx`
     * ```shell
-      helm -n test uninstall my-nginx \
-          && kubectl delte namespace test
+      helm -n basic-components uninstall my-ingress-nginx
       ```

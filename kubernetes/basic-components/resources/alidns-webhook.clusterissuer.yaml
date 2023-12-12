@@ -4,7 +4,7 @@ metadata:
   name: self-signed-cluster-issuer
 spec:
   acme:
-    email: conti821@163.com
+    email: austenconti@163.com
     privateKeySecretRef:
       name: self-signed-cluster-issuer
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -19,5 +19,5 @@ spec:
               secretKeySecretRef:
                 key: secret-key
                 name: alidns-webhook-secrets
-            groupName: acme.test.cnconti.cc
+            groupName: test.cnconti.cc
             solverName: alidns-solver

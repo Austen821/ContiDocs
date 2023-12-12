@@ -1,10 +1,7 @@
-# docker registry
+# docker registry auth
 
 ## main usage
 * a registry for docker
-
-## conceptions
-* none
 
 ## purpose
 * setup docker registry
@@ -12,15 +9,15 @@
 
 ## precondition
 * [kind.cluster](/kubernetes/kind-cluster.md)
-* [ingress-nginx](/kubernetes/basic%20components/ingress.nginx.md)
-* [cert-manager](/kubernetes/basic%20components/cert.manager.md)
+* [ingress-nginx](ingress-nginx.md)
+* [cert-manager](cert-manager.md)
 
-## do it
-1. prepare images
+## operation
+1. prepare [docker-registry-auth.values.yaml](resources/docker-registry-auth.values.yaml.md)
+2. prepare images
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p ${DOCKER_IMAGE_PATH}
-      BASE_URL="https://resource.cnconti.cc/docker-images"
-      # BASE_URL="https://resource-ops.lab.zjvis.net:32443/docker-images"
+      BASE_URL="https://resource.cnconti.cc:32443/docker-images"
       for IMAGE in "docker.io_registry_2.7.1.dim" \
           "docker.io_httpd_2.4.56-alpine3.17.dim" \
           "docker.io_busybox_1.33.1-uclibc.dim"
@@ -42,7 +39,7 @@
               && docker image rm $DOCKER_TARGET_IMAGE
       done
       ```
-2. create `docker-registry-secret`
+3. create `docker-registry-secret`
     * ```shell
       # create PASSWORD
       PASSWORD=($((echo -n $RANDOM | md5sum 2>/dev/null) || (echo -n $RANDOM | md5 2>/dev/null)))
@@ -50,43 +47,27 @@
       docker run --rm --entrypoint htpasswd httpd:2.4.56-alpine3.17 -Bbn admin ${PASSWORD} > ${PWD}/htpasswd
       # NOTE: username should have at least 6 characters
       kubectl -n basic-components create secret generic docker-registry-secret \
-          --from-literal=username=admin \
-          --from-literal=password=${PASSWORD} \
-          --from-file=${PWD}/htpasswd -o yaml --dry-run=client \
-          | kubectl -n basic-components apply -f -
+          --from-literal=username=admin --from-literal=password=${PASSWORD} \
+          --from-file=${PWD}/htpasswd
       ```
-3. prepare [docker.registry.values.yaml](resources/docker.registry.values.yaml.md)
 4. install by helm
-    *  NOTE: `https://resource-ops.lab.zjvis.net:32443/charts/helm.twun.io/docker-registry-1.14.0.tgz`
     * ```shell
       helm install \
           --create-namespace --namespace basic-components \
           my-docker-registry \
-          https://resource.cnconti.cc/charts/helm.twun.io/docker-registry-1.14.0.tgz \
-          --values docker.registry.values.yaml \
+          https://resource.cnconti.cc:32443/charts/helm.twun.io/docker-registry-1.14.0.tgz \
+          --values docker-registry-auth.values.yaml \
           --atomic
       ```
 5. configure ingress with tls
     * NOTE: ingress in helm chart is not compatible enough for us, we have to install ingress manually
-    * prepare [docker.registry.ingress.yaml](resources/docker.registry.ingress.yaml.md)
-    * apply ingress `my-docker-registry-ingress`
-        + ```shell
-          kubectl -n basic-components apply -f docker.registry.ingress.yaml
-          ```
+    * prepare [docker-registry.ingress.yaml](resources/docker-registry.ingress.yaml.md)
+    * ```shell
+      kubectl -n basic-components apply -f docker-registry.ingress.yaml
+      ```
 
 ## test
-1. check with docker-registry
-   * ```shell
-     echo '127.0.0.1 docker-registry.local' >> /etc/hosts \
-         && IMAGE=docker.io/busybox:1.33.1-uclibc \
-         && TARGET_IMAGE=docker-registry.local/$IMAGE \
-         && docker tag $IMAGE $TARGET_IMAGE \
-         && docker push $TARGET_IMAGE \
-         && docker image rm $IMAGE \
-         && docker image rm $TARGET_IMAGE \
-         && docker pull $TARGET_IMAGE \
-         && echo success
-     ```
+1. TODO
 
 ## uninstall
 1. delete ingress `my-docker-registry-ingress`
@@ -96,5 +77,6 @@
 2. uninstall `my-docker-registry`
     * ```shell
       helm -n basic-components uninstall my-docker-registry \
-          && kubectl -n basic-components delete pvc my-docker-registry
+          && kubectl -n basic-components delete pvc my-docker-registry \
+          && kubectl -n basic-components delete secret docker-registry-secret
       ```

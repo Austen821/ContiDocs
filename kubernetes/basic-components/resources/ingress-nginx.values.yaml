@@ -3,7 +3,6 @@ controller:
     registry: localhost:5000/k8s.gcr.io
     image: ingress-nginx/controller
     tag: "v1.0.3"
-    digest: ""
   service:
     type: NodePort
     nodePorts:
@@ -17,7 +16,6 @@ controller:
         registry: localhost:5000/k8s.gcr.io
         image: ingress-nginx/kube-webhook-certgen
         tag: v1.0
-        digest: ""
         pullPolicy: IfNotPresent
 defaultBackend:
   enabled: false
@@ -27,4 +25,3 @@ defaultBackend:
     image: defaultbackend-amd64
     tag: "1.5"
     pullPolicy: IfNotPresent
-imagePullSecrets: []

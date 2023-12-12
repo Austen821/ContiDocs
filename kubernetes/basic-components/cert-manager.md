@@ -4,23 +4,19 @@
 * create certification of ssl automatically by cert-manager
 * use http01 method
 
-## conceptions
-* none
-
 ## purpose
 * create a kubernetes cluster by kind
 * setup cert-manager
 
 ## precondition
-* [create a kubernetes cluster](/kubernetes/create.local.cluster.with.kind.md)
-* [installed ingree-nginx](/kubernetes/basic%20components/ingress.nginx.md)
+* [kind-cluster](/kubernetes/kind-cluster.md)
 
-## do it
-1. prepare images
+## operation
+1. prepare [cert-manager.values.yaml](resources/cert-manager.values.yaml.md)
+2. prepare images
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p $DOCKER_IMAGE_PATH
-      BASE_URL="https://resource.cnconti.cc/docker-images"
-      # BASE_URL="https://resource-ops.lab.zjvis.net:32443/docker-images"
+      BASE_URL="https://resource.cnconti.cc:32443/docker-images"
       for IMAGE in "quay.io_jetstack_cert-manager-controller_v1.5.4.dim" \
           "quay.io_jetstack_cert-manager-webhook_v1.5.4.dim" \
           "quay.io_jetstack_cert-manager-cainjector_v1.5.4.dim" \
@@ -48,25 +44,20 @@
               && docker image rm $DOCKER_TARGET_IMAGE
       done
       ```
-2. prepare [cert.manager.values.yaml](resources/cert.manager.values.yaml.md)
-3. install by helm
-    * NOTE: `https://resource-ops.lab.zjvis.net:32443/charts/charts.jetstack.io/cert-manager-v1.5.4.tgz`
+3. install `cert-manager` by helm
     * ```shell
        helm install \
            --create-namespace --namespace basic-components \
            my-cert-manager \
-           https://resource.cnconti.cc/charts/charts.jetstack.io/cert-manager-v1.5.4.tgz \
-           --values cert.manager.values.yaml \
+           https://resource.cnconti.cc:32443/charts/charts.jetstack.io/cert-manager-v1.5.4.tgz \
+           --values cert-manager.values.yaml \
            --atomic
        ```
-4. create cluster-issuer
-   * prepare [self.signed.cluster.issuer.yaml](resources/self.signed.cluster.issuer.yaml.md)
+4. create ClusterIssuer `self-signed-cluster-issuer`
+   * prepare [self-signed.clusterissuer.yaml](resources/self-signed.clusterissuer.yaml.md)
      * ```shell
-       kubectl -n basic-components apply -f self.signed.cluster.issuer.yaml
+       kubectl -n basic-components apply -f self-signed.clusterissuer.yaml
        ```
-
-## test
-1. TODD
 
 ## uninstall
 1. delete ClusterIssuer `self-signed-cluster-issuer`

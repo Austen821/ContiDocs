@@ -8,4 +8,4 @@ image:
 certManager:
   namespace: basic-components
   serviceAccountName: my-cert-manager
-groupName: acme.test.cnconti.cc
+groupName: test.cnconti.cc

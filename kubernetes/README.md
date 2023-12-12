@@ -1,7 +1,7 @@
 # Kubernetes
 
 * [kind-cluster](kind-cluster.md)
-* [basic-components](basic%20components/README.md)
+* [basic-components](basic-components/README.md)
 * [software](software/README.md)
 * [storage](storage/README.md)
 * [monitor](monitor/README.md)
