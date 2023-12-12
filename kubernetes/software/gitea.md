@@ -16,8 +16,8 @@
 ## pre-requirements
 * [init_kind_cluster](/kubernetes/local_kind_cluster/README.md)
 * basic-components
-  * [ingress](../basic/ingress.nginx.md)
-  * [cert-manager](../basic/cert.manager.md)
+  * [ingress](../basic%20components/ingress.nginx.md)
+  * [cert-manager](../basic%20components/cert.manager.md)
 
 ## do it
 1. prepare [gitea.values.yaml](resources/gitea.values.yaml.md)

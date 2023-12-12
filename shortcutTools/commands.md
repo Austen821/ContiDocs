@@ -5,7 +5,7 @@
 * [VIM](commands/vim.md)
 * [Git](commands/git.md)
 * [docker](/docker/commands.md)
-* [kubernetes](/kubernetes/commands.md)
+* [kubernetes](/kubernetes/resources/commands.md)
 
 ## language
 * [java](/language/java/commands.md)

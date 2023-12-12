@@ -25,7 +25,7 @@
 1. [create local cluster for testing](../../../create.local.cluster.with.kind.md)
 
 2. install ingress nginx
-    * prepare [ingress.nginx.values.yaml](../../../basic/resources/ingress.nginx.values.yaml.md)
+    * prepare [ingress.nginx.values.yaml](../../../basic%20components/resources/ingress.nginx.values.yaml.md)
 
     * prepare images
         + ```shell

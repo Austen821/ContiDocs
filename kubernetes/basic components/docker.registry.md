@@ -11,9 +11,9 @@
 * test docker registry
 
 ## precondition
-* [kind.cluster](/kubernetes/kind.cluster.md)
-* [ingress-nginx](/kubernetes/basic/ingress.nginx.md)
-* [cert-manager](/kubernetes/basic/cert.manager.md)
+* [kind.cluster](/kubernetes/kind-cluster.md)
+* [ingress-nginx](/kubernetes/basic%20components/ingress.nginx.md)
+* [cert-manager](/kubernetes/basic%20components/cert.manager.md)
 
 ## do it
 1. prepare images

@@ -9,7 +9,7 @@
 * none
 
 ## precondition
-* [kind_cluster](/kubernetes/kind.cluster.md)
+* [kind_cluster](/kubernetes/kind-cluster.md)
 
 ## operation
 1. prepare [ingress.nginx.values.yaml](resources/ingress.nginx.values.yaml.md)

@@ -13,9 +13,9 @@
 
 ## pre-requirements
 * [create.local.cluster.with.kind](/kubernetes/create.local.cluster.with.kind.md)
-* [ingress-nginx](../basic/ingress.nginx.md)
-* [cert-manager](../basic/cert.manager.md)
-* [docker-registry](../basic/docker.registry.md)
+* [ingress-nginx](../basic%20components/ingress.nginx.md)
+* [cert-manager](../basic%20components/cert.manager.md)
+* [docker-registry](../basic%20components/docker.registry.md)
 
 ## do it
 1. prepare images

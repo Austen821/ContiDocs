@@ -27,14 +27,13 @@
               && rm -f $IMAGE_FILE
       fi
       ```
-2. prepare [kind.cluster.yaml](resources/kind.cluster.yaml.md) as file `/tmp/kind.cluster.yaml`
-3. prepare [kind.with.registry.sh](resources/kind.with.registry.sh.md) as file `/tmp/kind.with.registry.sh`
+2. prepare [kind-cluster.yaml](resources/kind-cluster.yaml.md) as file `/tmp/kind-cluster.yaml`
+3. prepare [kind-registry.sh](resources/kind-registry.sh.md) as file `/tmp/kind-registry.sh`
 4. install `kind-cluster`
     * ```shell
-      bash /tmp/kind.with.registry.sh /tmp/kind.cluster.yaml \
-          /root/bin/kind /root/bin/kubectl
+      bash /tmp/kind-registry.sh /tmp/kind-cluster.yaml /root/bin/kind /root/bin/kubectl
       ```
-5. check `kind-cluster`
+5. check kind-cluster `kind`
     * ```shell
       kubectl -n kube-system wait --for=condition=ready pod --all \
           && kubectl get pod --all-namespaces

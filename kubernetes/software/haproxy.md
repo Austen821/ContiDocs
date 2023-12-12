@@ -47,7 +47,7 @@
      ```
 
 ## test
-1. [install nginx](/kubernetes/basic/nginx.web.md)
+1. [install nginx](/kubernetes/basic%20components/nginx.web.md)
 2. 准备三个nginx进行负载均衡测试
    * [nginx.www]()
    * [nginx.blog]()

@@ -11,8 +11,8 @@
 
 ## precondition
 * [create local cluster for testing](../create.local.cluster.with.kind.md)
-* [ingress](../basic/ingress.nginx.md)
-* [cert-manager](../basic/cert.manager.md)
+* [ingress](../basic%20components/ingress.nginx.md)
+* [cert-manager](../basic%20components/cert.manager.md)
 
 ## do it
 * prepart [sshd.values.yaml](sshd/sshd.values.yaml.md)

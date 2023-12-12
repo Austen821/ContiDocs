@@ -8,9 +8,9 @@
 
 ### pre-requirements
 * [create.local.cluster.with.kind](../create.local.cluster.with.kind.md)
-* [ingress.nginx](../basic/ingress.nginx.md)
-* [cert.manager](../basic/cert.manager.md)
-* [docker.registry](../basic/docker.registry.md)
+* [ingress.nginx](../basic%20components/ingress.nginx.md)
+* [cert.manager](../basic%20components/cert.manager.md)
+* [docker.registry](../basic%20components/docker.registry.md)
 
 ### installation
 1. prepare [pypiserver.values.yaml](resources/pypiserver.values.yaml.md)

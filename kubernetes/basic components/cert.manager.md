@@ -13,7 +13,7 @@
 
 ## precondition
 * [create a kubernetes cluster](/kubernetes/create.local.cluster.with.kind.md)
-* [installed ingree-nginx](/kubernetes/basic/ingress.nginx.md)
+* [installed ingree-nginx](/kubernetes/basic%20components/ingress.nginx.md)
 
 ## do it
 1. prepare images

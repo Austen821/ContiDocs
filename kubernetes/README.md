@@ -1,7 +1,7 @@
 # Kubernetes
 
-* [kind_cluster](kind.cluster.md)
-* [basic-components](basic/README.md)
+* [kind-cluster](kind-cluster.md)
+* [basic-components](basic%20components/README.md)
 * [software](software/README.md)
 * [storage](storage/README.md)
 * [monitor](monitor/README.md)
@@ -25,11 +25,11 @@
 * [simulation-231129-kubeadm](install/simulation-231129/README.md)
 
 ## share
-* [kubernetes](share/kubernetes.md)
-* [zjvis](share/zjvis.md)
+* [simulation](share/simulation.md)
+* [ZKYQ](share/ZKYQ.md)
 
 ## other
 * [kubernetes binary tools](install/kind-cluster/binary_tools.md)
-* [commands](commands.md)
-* [k8s CNI](resources/cni.md)
+* [commands](resources/commands.md)
+* [k8s CNI](resources/k8s-CNI.md)
 
