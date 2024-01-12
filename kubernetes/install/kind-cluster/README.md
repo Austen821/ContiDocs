@@ -1,6 +1,6 @@
 # kind-cluster
 * create a local k8s cluster
-* kubernetes: `v1.25.6`
+* kubernetes: `v1.26.6`
 
 ## installation
 * [k8s-installation](k8s-installation.md)

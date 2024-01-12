@@ -2,7 +2,7 @@
 
 ## main usage
 * create a local k8s cluster
-* kubernetes: `v1.25.6`
+* kubernetes: `v1.26.6`
 
 ## precondition
 * prepare the machine
@@ -19,7 +19,7 @@
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p $DOCKER_IMAGE_PATH
       BASE_URL="https://resource.cnconti.cc:32443/docker-images"
-      IMAGE="docker.io_kindest_node_v1.25.6.dim"
+      IMAGE="docker.io_kindest_node_v1.26.6.dim"
       IMAGE_FILE=$DOCKER_IMAGE_PATH/$IMAGE
       if [ ! -f $IMAGE_FILE ]; then
           curl -fo $IMAGE_FILE -L $BASE_URL/$IMAGE \

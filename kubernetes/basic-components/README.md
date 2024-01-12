@@ -6,5 +6,6 @@
 * [docker-registry](docker-registry.md)
 * [docker-registry-auth](docker-registry-auth.md)
 * [docker-registry-tls](docker-registry-tls.md)
+* [kubernetes-dashboard](kubernetes-dashboard.md)
 * [pureLB](pureLB.md)
 

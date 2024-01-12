@@ -6,7 +6,6 @@
     * ```shell
       DOCKER_IMAGE_PATH=/root/docker-images && mkdir -p $DOCKER_IMAGE_PATH
       BASE_URL="https://resource.cnconti.cc/docker-images"
-      # BASE_URL="https://resource-ops.lab.zjvis.net:32443/docker-images"
       for IMAGE in "quay.io_jetstack_cert-manager-controller_v1.5.4.dim" \
           "quay.io_jetstack_cert-manager-webhook_v1.5.4.dim" \
           "quay.io_jetstack_cert-manager-cainjector_v1.5.4.dim" \
@@ -30,7 +29,16 @@
           kind load docker-image ${IMAGE}
       done
       ```
-3. create cluster issuer `self-signed-cluster-issuer`
+3. install `cert-manager` by helm
+    * ```shell
+      helm install \
+          --create-namespace --namespace basic-components \
+          my-cert-manager \
+          https://resource.cnconti.cc:32443/charts/charts.jetstack.io/cert-manager-v1.5.4.tgz \
+          --values cert-manager.values.yaml \
+          --atomic
+      ```
+4. create cluster issuer `self-signed-cluster-issuer`
     * prepare [self-signed.clusterissuer.yaml](resources/self-signed.clusterissuer.yaml.md)
     * ```shell
       kubectl -n basic-components apply -f self-signed.clusterissuer.yaml

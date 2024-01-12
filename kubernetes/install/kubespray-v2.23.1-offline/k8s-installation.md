@@ -1,128 +1,117 @@
-## kubespray-offline-231009
+## kubespray-offline-231220
 
 ### prepare
-1. prepare 6 nodes with `Fedora 38`
-    * operator: 192.168.11.129(配置工作节点的免密登录)
-    * master: 192.168.11.130
-    * worker1: 192.168.11.131
-    * worker2: 192.168.11.132
-    * worker3: 192.168.11.133
+1. prepare 3 nodes with `Centos7`
+    * master: 192.168.31.51 `operator`
+    * worker1: 192.168.31.52
+    * worker2: 192.168.31.53
 2. resources info
-    * kubespray-nginx #nginx默认根目录，k8s部署相关的文件
+    * kubespray-file #k8s部署相关的文件
     * kubespray-images #私有镜像仓库registry镜像及部署脚本
-    * kubespray #官方kubespray-v2.23.0源码
+    * kubespray-v2.23.1 #官方kubespray-v2.23.0源码
 
 ### installation operator
-1. configure repositories
-    * prepare local yum-registry [Fedora-38-yum-231009](resources/Fedora-38-yum-231009.md)
-    * copy `Fedora-38-base-231009.tar.gz` as file `/data/Fedora-38-base-231009.tar.gz`
-    * copy `Fedora-38-updates-231009.tar.gz` as file `/data/Fedora-38-updates-231009.tar.gz`
-    * copy `Fedora-38-docker-ce-231009.tar.gz` as file `/data/Fedora-38-docker-ce-231009.tar.gz`
-    * remove all repo configuration
+1. configure repositories at every node
+    * prepare `Centos7-base-231220.tar.gz` [Centos7-base](resources/Centos7-base.md)
+    * prepare `Centos7-extras-231220.tar.gz` [Centos7-extras](resources/Centos7-extras.md)
+    * prepare `Centos7-docker-ce-231220.tar.gz` [Centos7-docker-ce](resources/Centos7-docker-ce.md)
     * ```shell
       rm -rf /etc/yum.repos.d/* \
-          && tar xvf /data/Fedora-38-base-231009.tar.gz -c /data/base \
-          && tar xvf /data/Fedora-38-extras-231009.tar.gz -c /data/updates \
-          && tar xvf /data/Fedora-38-docker-ce-231009.tar.gz -c /data/docker-ce
+          && tar xvf Centos7-base-231220.tar.gz -c /data/base \
+          && tar xvf Centos7-extras-231220.tar.gz -c /data/extras \
+          && tar xvf Centos7-docker-ce-231220.tar.gz -c /data/docker-ce
       ```
-    * copy [fedora.offline.repo](resources/fedora.offline.repo.md) as file `/etc/yum.repos.d/fedora.offline.repo`
-2. configure ntp
+    * prepare [centos7.offline.repo](resources/centos7.offline.repo) as file `/etc/yum.repos.d/centos7.offline.repo`
+2. configure ntp at every node
     * ```shell
-      dnf install -y chrony \
-         && systemctl enable chronyd \
-         && systemctl start chronyd \
-         && chronyc sources && chronyc tracking \
-         && timedatectl set-timezone 'Asia/Shanghai'
+      yum install -y chrony && systemctl enable chronyd && systemctl start chronyd \
+         && chronyc sources && chronyc tracking && timedatectl set-timezone 'Asia/Shanghai'
       ```
-3. install basic tools
+3. install base environment
+    * prepare [centos7.setup.base.sh](resources/centos7.setup.base.sh.md) as file `/tmp/centos7.setup.base.sh`
     * ```shell
-      dnf install -y vim curl net-tools docker-ce-23.0.6 containerd.io \
-           docker-ce-cli-23.0.6 docker-ce-rootless-extras-23.0.6 docker-compose-plugin-2.19.1
+      bash /tmp/centos7.setup.base.sh
       ```
 4. prepare images
-    * prepare [kubespray-images](resources/kubespray-images.md)
-    * copy `kubespray-images.tar.gz` as file `$HOME/kubespray-images.tar.gz`
+    * prepare `kubespray-images-231220.tar.gz` [kubespray-images](resources/kubespray-images.md)
     * ```shell
-      DOCKER_IMAGE_PATH=$HOME/kubespray-images && mkdir -p $DOCKER_IMAGE_PATH
-      tar xvf $HOME/kubespray-images.tar.gz -C $HOME && \
+      tar xvf kubespray-images-231220.tar.gz -C $HOME && \
       for IMAGE in "docker.io-library-nginx-1.25.2-alpine.dim" \
           "docker.io-library-registry-2.8.1.dim" \
-          "quay.io-kubespray-kubespray-v2.23.0.dim"
+          "quay.io-kubespray-kubespray-v2.23.1.dim"
       do
-          docker image load -i $DOCKER_IMAGE_PATH/$IMAGE
+          docker image load -i $HOME/kubespray-images$IMAGE
       done
       ```
-5. prepare yum repo
-    * prepare [fedora-38-yum.nginx.conf](resources/fedora-38-yum.nginx.conf.md)
+5. make `yum-registry`
+    * prepare [yum-registry.nginx.conf](resources/yum-registry.nginx.conf.md) as file `/tmp/yum-registry.nginx.conf`
     * ```shell
       docker run \
-          --name fedora-38-yum \
+          --name yum-registry \
           --restart always \
-          -p 8090:80 \
+          -p 8001:80 \
+          -v $PWD/yum-registry.nginx.conf:/etc/nginx/nginx.conf \
           -v /data/base:/usr/share/nginx/html/base \
-          -v /data/updates:/usr/share/nginx/html/updates \
+          -v /data/extras:/usr/share/nginx/html/extras \
           -v /data/docker-ce:/usr/share/nginx/html/docker-ce \
           -d docker.io/library/nginx:1.25.2-alpine
       ```
-7. prepare file repo
-    * prepare [kubespray-nginx](resources/kubespray-nginx.md)
-    * copy `kubespray-nginx.tar.gz` as file `$HOME/kubespray-nginx.tar.gz`
-    * start nginx-server in docker
+6. make `file-registry`
+    * prepare `kubespray-file-231220.tar.gz` [kubespray-file](resources/kubespray-file.md)
+    * prepare [file-registry.nginx.conf](resources/file-registry.nginx.conf.md)
     * ```shell
-      tar zcvf $HOME/kubespray-nginx.tar.gz -C $HOME \
-          && bash $HOME/kubespray-nginx/nginx-file.sh
-      ```
-8. prepare docker-registry
-    * ```shell
+      tar xvf kubespray-file-231220.tar.gz -C $HOME
       docker run \
-          --name registry \
+          --name file-registry \
           --restart always \
-          -p 5000:5000 \
-          -d docker.io/library/registry:2.8.1
+          -p 8002:80 \
+          -v $PWD/file-registry.nginx.conf:/etc/nginx/nginx.conf \
+          -v $HOME/kubespray-file:/usr/share/nginx/html \
+          -d docker.io/library/nginx:1.25.2-alpine
       ```
-    * registering the images to local registry
+7. registering the images to local registry
+    * prepare [upload-iamge.sh] as file `/tmp/upload-iamge.sh`
     * ```shell
-       bash $HOME/kubespray-images/images.sh
-       ```
-9. clone kubespray with specific version(v2.23.0)
-    * prepare [kubespray-v2.23.0](resources/kubespray-v2.23.0.md)
-    * copy `kubespray-v2.23.0.tar.gz` as file `$HOME/kubespray-v2.23.0.tar.gz`
-    * ```shell
-      tar xvf $HOME/kubespray-v2.23.0.tar.gz -C $HOME
+      bash
       ```
-    * start kubespray in docker
+8. clone kubespray with specific version `v2.23.1`
+    * prepare `kubespray-v2.23.1.tar.gz` [kubespray-v2.23.1](resources/kubespray-v2.23.1.md)
     * ```shell
-      docker run \
-          --rm -it \
-          --workdir /app \
-          -v $HOME/kubespray:/app \
-          -v $HOME/.ssh:/root/.ssh:ro \
-          quay.io/kubespray/kubespray:v2.23.0 bash
+      tar xvf $HOME/kubespray-v2.23.1.tar.gz -C $HOME && \
+      docker run --rm -it \
+           --workdir /app \
+           -v $HOME/kubespray-v2.23.1:/app \
+           -v $HOME/.ssh:/root/.ssh:ro \
+           quay.io/kubespray/kubespray:v2.23.1 bash
       ```
-10. generate configurations for kubespray
-     * ```shell
-       cp -rfp inventory/sample inventory/mycluster
-       declare -a IPS=(192.168.12.12 192.168.12.13 192.168.12.14)
-       CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}
-       ```
-11. stop and disable firewalld
+    * generate configurations for kubespray
+    * ```shell
+      cp -rfp inventory/sample inventory/mycluster
+      declare -a IPS=(192.168.31.51 192.168.31.52 192.168.31.53)
+      CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}
+      ```
+    * stop and disable firewalld
     * ```shell
       ansible -i inventory/mycluster/hosts.yaml all -m command -a "systemctl stop firewalld"
       ansible -i inventory/mycluster/hosts.yaml all -m command -a "systemctl disable firewalld"
       ```
-12. modify `inventory/mycluster/group_vars/all/offline.yml`
-    * ```text
-      registry_host: "kubespray-operator:5000"
-      files_repo: "http://kubespray-operator:8080"
-      yum_repo: "http://kubespray-operator:9090"
+9. modify `$HOME/kubespray-v2.23.1/inventory/mycluster/group_vars/all/offline.yml`
+    * `yum_repo: "http://192.168.31.51:8001"`
+    * `files_repo: "http://192.168.31.51:8002"`
+10. install kubernetes cluster with ansible
+    * ```shell
+      docker run --rm -it \
+           --workdir /app \
+           -v $HOME/kubespray-v2.23.1:/app \
+           -v $HOME/.ssh:/root/.ssh:ro \
+           quay.io/kubespray/kubespray:v2.23.1 bash
       ```
-13. install kubernetes cluster with ansible
-     * ```shell
-       ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root reset.yml
-       # you may have to retry several times to install kubernetes cluster successfully for the bad network
-       ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root cluster.yml
-       ```
-14. copy configurations for kubectl
+    * ```shell
+      ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root reset.yml
+      # you may have to retry several times to install kubernetes cluster successfully for the bad network
+      ansible-playbook -i inventory/mycluster/hosts.yaml --become --become-user=root cluster.yml
+      ```
+11. copy configurations for kubectl
      * ```shell
        mkdir ~/.kube \
            && cp /etc/kubernetes/admin.conf ~/.kube/config \
