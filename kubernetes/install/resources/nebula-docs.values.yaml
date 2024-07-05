@@ -1,0 +1,23 @@
+image:
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/nebula-docs-vue
+  tag: "d1b151bdc-1.0.0-C4f979aa"
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/cluster-issuer: alidns-webhook-letsencrypt
+    nginx.ingress.kubernetes.io/proxy-body-size: 2g
+    nginx.org/client-max-body-size: 2g
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+  hosts:
+    - host: nebula-stable.lab.zjvis.net
+      paths:
+        - path: /docs/?(.*)
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: nebula-stable.lab.zjvis.net-tls
+    - hosts:
+        - nebula-stable.lab.zjvis.net

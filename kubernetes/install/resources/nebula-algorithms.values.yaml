@@ -1,0 +1,29 @@
+image:
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/nebula-algorithms-flask
+  tag: "92c2763-1.0.0-C69b3411"
+centos:
+  name: centos
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/centos
+  tag: "centos8.4.2105"
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+livenessProbe:
+  failureThreshold: 30
+  httpGet:
+    path: /health/liveness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+readinessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /health/readiness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1

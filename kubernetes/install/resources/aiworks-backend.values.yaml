@@ -1,0 +1,267 @@
+image:
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/aiworks-backend-springboot
+  tag: "22d342ad4-1.0.0-C4f979aa"
+centos:
+  name: centos
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/centos
+  tag: "centos8.4.2105"
+service:
+  socket:
+    io:
+      enabled: true
+      type: ClusterIP
+      port: 1080
+      targetPort: 1080
+livenessProbe:
+  failureThreshold: 30
+  httpGet:
+    path: /
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+readinessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: alidns-webhook-letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-body-size: 5g
+  hosts:
+    - host: nebula-stable.lab.zjvis.net
+      paths:
+        - path: /api/?(.*)
+          pathType: ImplementationSpecific
+  socket:
+    io:
+      enabled: true
+      className: "nginx"
+      annotations:
+        cert-manager.io/cluster-issuer: alidns-webhook-letsencrypt
+        nginx.ingress.kubernetes.io/proxy-body-size: 5g
+        nginx.ingress.kubernetes.io/proxy-connect-timeout: "7200"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+        nginx.ingress.kubernetes.io/rewrite-target: /socket.io/$1
+        nginx.ingress.kubernetes.io/websocket-services: app-sockets-cluster-ip-service
+      hosts:
+        - host: nebula-stable.lab.zjvis.net
+          paths:
+            - path: /socket.io/?(.*)
+              pathType: ImplementationSpecific
+      tls:
+        - secretName: nebula-stable.lab.zjvis.net-tls
+          hosts:
+            - nebula-stable.lab.zjvis.net
+  tls:
+    - secretName: nebula-stable.lab.zjvis.net-tls
+      hosts:
+        - nebula-stable.lab.zjvis.net
+secret:
+  mountPath: "/app/application.yaml"
+  application: |-
+    app:  
+      server:
+        port: 8080
+      sampling: true
+      socketio:
+        port: 1080
+        boss-count: 1
+        work-count: 100
+        allow-custom-requests: true
+        upgrade-timeout: 1000000
+        ping-timeout: 6000000
+        ping-interval: 25000
+      proxy:
+        nebula:
+          port: 8080
+          schema: http
+          host: nebula-backend-java.nebula-stable
+          prefix:
+            path : "/"
+    restful:
+      flaskServer:
+        address: http://aiworks-algorithms-flask.nebula-stable:8080
+      insightServer:
+        address: https://jianwei.zjvis.net/api
+        frontend: https://jianwei.zjvis.net
+      algoServer:
+        address: http://nebula-backend-java.nebula-stable:8080/algorithm/v1/invoke
+      knowledgeGraph:
+        url: http://nebula-backend-java.nebula-stable:8080/knowledge/graph/file/
+      nebula:
+        url: http://nebula-backend-java.nebula-stable:8080/
+    upload:
+      large-file-threshold: 50MB
+      is-win: false
+      chunk-size: 5242880
+      folder-path: ./file_uploads
+      expire-time: 1209600
+      temp-file-path: ./csv_tmp/
+      shp2pgsql-path: /usr/bin/shp2pgsql
+      gis:
+        file-path: ./gis_data/
+      photo:
+        resource-path: nebula
+        path: vis/wordcloud/
+      case:
+        video-path: vis/caseVideo/
+      model:
+        folder-path: /opt/file_models/
+    spring:
+      application:
+        name: datascience
+      servlet:
+        multipart:
+          max-request-size: 1GB
+          max-file-size: 1GB
+      output:
+        ansi:
+          enabled: always
+      jackson:
+        time-zone: GMT+8
+      mvc:
+        async:
+          request-timeout: 600000
+      datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://my-mariadb.middleware-nebula-stable:3306/aiworks?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true&serverTimezone=Asia/Shanghai&useSSL=false
+          host: my-mariadb.middleware-nebula-stable
+          port: 3306
+          username: "********"
+          password: "********"
+          keep-alive: true
+          initial-size: 10
+          max-active: 100
+          max-wait: 500
+          time-between-eviction-runs-millis: 60000
+          max-evictable-idle-time-millis: 1800001
+          min-evictable-idle-time-millis: 160000
+          test-while-idle: true
+          test-on-borrow: true
+          test-on-return: false
+          pool-prepared-statements: true
+          max-pool-prepared-statement-per-connection-size: 10
+          validation-query: "select 1"
+      redis:
+        cluster:
+          nodes: 
+            - my-redis-cluster.middleware-nebula-stable:6379
+          max-redirects: 5
+        database: 0
+        password: "********"
+        timeout: 500
+        lettuce:
+          pool:
+            max-active: 1000
+            max-idle: 10
+            min-idle: 5
+            max-wait: -1
+    jwt:
+      header: Authorization
+      token-start-with: Bearer
+      base64-secret: ZmQ0ZGI5NjQ0MDQwY2I4MjMxY2Y3ZmI3MjdhN2ZmMjNhODViOTg1ZGE0NTBjMGM4NDA5NzYxMjdjOWMwYWRmZTBlZjlhNGY3ZTg4Y2U3YTE1ODVkZDU5Y2Y3OGYwZWE1NzUzNWQ2YjFjZDc0NGMxZWU2MmQ3MjY1NzJmNTE0MzI=
+      token-validity-in-seconds: 86400000
+      online-key: online-token-
+      code-key: code-key
+    rsa:
+      privateKey: MIIBUwIBADANBgkqhkiG9w0BAQEFAASCAT0wggE5AgEAAkEA0vfvyTdGJkdbHkB8mp0f3FE0GYP3AYPaJF7jUd1M0XxFSE2ceK3k2kw20YvQ09NJKk+OMjWQl9WitG9pB6tSCQIDAQABAkA2SimBrWC2/wvauBuYqjCFwLvYiRYqZKThUS3MZlebXJiLB+Ue/gUifAAKIg1avttUZsHBHrop4qfJCwAI0+YRAiEA+W3NK/RaXtnRqmoUUkb59zsZUBLpvZgQPfj1MhyHDz0CIQDYhsAhPJ3mgS64NbUZmGWuuNKp5coY2GIj/zYDMJp6vQIgUueLFXv/eZ1ekgz2Oi67MNCk5jeTF2BurZqNLR3MSmUCIFT3Q6uHMtsB9Eha4u7hS31tj1UWE+D+ADzp59MGnoftAiBeHT7gDMuqeJHPL4b+kC+gzV4FGTfhR9q3tTbklZkD2A==
+      publicKey: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANL378k3RiZHWx5AfJqdH9xRNBmD9wGD2iRe41HdTNF8RUhNnHit5NpMNtGL0NPTSSpPjjI1kJfVorRvaQerUgkCAwEAAQ==
+    shiro:
+      cipher-key: f/SY5TIve5WWzT4aQlABJA==
+      cookie:
+        name: rememberMe
+        max-age: 604800
+        redis-key-prefix: online-user-info-
+    login:
+      tianshu:
+        key:
+          private: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAKzFLdDBGeD9yU5G63dGpFZ9PeD53I5kYn9PKarlVrnDZPzHzB_pKW1p3_vXDVEtUhEk1PthoaueEu7Erb730oO1vXhl2-If7K9BPh_Fa5AQWz4yZQh4-cFPm9x-AZ6cXGbRhFuRUgjgV51Uv0hkpQ9BVc7gS4A6QyuMZ2J1YWb9AgMBAAECgYAu9CueZ0x0NCTIjEekE-PHyaPOh7lkTW3jcY0-b7OhKrRAasBUD9b9cF-6Htj0rd92306uvvrkHELC91rM4qcoSAjdIAnvRbYgEK3a5hGVVCdZPLOMx41YEioLiYFdhtcnIC9Dr-KnJCryyPU-5ZAPutA9eLwVcSqwL-eAC2iK1QJBANvE9dydmiCqWPfDSiuvgpVtRMl2wCato7G2q6v1dzulWAnZkKSYDvs-c27kzYIZKyVFFlMnkQwqIMrte10rYjcCQQDJQLCEZg_GQ4_eX1DdnKueBOEiB_mKc4-eAjMy0r89zqxcubMQKm5kTJ7EaB1yqqGI-JWU841AlG4qkA1t1nZrAkBZpT0ZEdymCHakEjA2I7CjnV_awirdXCUSv83FJirN1MNVuT6sNS6fQ7k4efJuaC_WUxkpMFGVYbXgsQCKX8D_AkEAi7ULlK2hL7pBClbStTUIcebjPpOYqIM2ZLMURajFN6vcPXZwFr3N6nTCFohMQQiwoHwoosE8AmPH4mYj3GbvxwJAfjFZLUjL4RroL69YnR4_UArohvssoV7GNpo4PWzRP_lMOCf_pPHqICo14K0Lk-fOFk3cIcY_X666awhWHZOt-A
+          public: MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsxS3QwRng_clORut3RqRWfT3g-dyOZGJ_Tymq5Va5w2T8x8wf6Sltad_71w1RLVIRJNT7YaGrnhLuxK2-99KDtb14ZdviH-yvQT4fxWuQEFs-MmUIePnBT5vcfgGenFxm0YRbkVII4FedVL9IZKUPQVXO4EuAOkMrjGdidWFm_QIDAQAB
+        salt: abcdefg
+        code:
+          timeout: 3600000
+    jasypt:
+      encryptor:
+        password: 4tr=Kl34jDs@O/u4_#2c
+    aliyun:
+      access-key-id: "XXXXXXXX"
+      access-key-secret: "XXXXXXXX"
+      master-key-value: ZJLAB
+      sms-magic-key: ZJVIS2022
+      sms-white-list-phone-numbers: 18843109388,18795896007
+    logging:
+      level:
+        org.zjvis.datascience.service.mapper: WARN
+        org.docx4j: WARN
+        springfox.documentation.spring.web.readers.operation.CachingOperationNameGenerator: WARN
+      config: classpath:logback-spring-prod.xml
+    swagger:
+      push:
+        enable: false
+    mybatis:
+      mapper-locations: classpath*:mapper/*.xml
+      type-aliases-package: org.zjvis.datascience.common.dto
+      configuration:
+        map-underscore-to-camel-case: true
+      type-handlers-package: org.zjvis.datascience.common.handler   
+    pagehelper:
+      helperDialect: mysql
+      reasonable: true
+      supportMethodsArguments: true
+      params: count=countSql
+      returnPageInfo: check
+    postgres:
+      port: 5432
+      host: my-postgresql.middleware-nebula-stable
+      driver: org.postgresql.Driver
+      username: "********"
+      password: "********"
+      database: aiworks
+      pool:
+        init-size: 20
+        max-active: 300
+        min-idle: 10
+        max-wait-time: 30000
+        retry: 3
+    minio:
+      url: http://my-minio.middleware-nebula-stable:9000
+      secret: "********"
+      password: "********"
+      bucket-size: 100MB
+    Jlab:
+      homeDir: /root/flask/aiworks-py/common/
+      notebookDir: /root/jupyterlab/notebooks/
+      initLab: init_container.sh
+      loadData: load_data.sh
+      loadView: load_view.sh
+      getToken: get_token.sh
+      df2db: df_to_db.sh
+      urlTemp: "http://10.105.20.48:%d/lab/workspaces/auto/tree/%s/?token=%s"
+      userName: root
+      password: Eccom@2021
+      port: 22
+      host: 10.105.20.48
+    Jhub:
+      host: http://proxy-public.middleware-nebula-stable/jupyterhub
+      adminUser: admin
+      adminPassword: "********"
+      blockSize: 2097152
+      gpServer:
+        df2db: df_to_db.sh
+        execFileHomeDir: /root/flask/aiworks-py/common/
+        fileInGPServerHomeDir: /home/gpdata/jupyterHubFile/

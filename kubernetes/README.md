@@ -24,6 +24,7 @@
 * [nebula-231208-kubeadm](install/nebula-231208/README.md)
 * [simulation-231121](install/simulation-231121/README.md)
 * [simulation-231129-kubeadm](install/simulation-231129/README.md)
+* [zd-nebula](install/zd-nebula.md)
 
 ## share
 * [simulation](share/simulation.md)

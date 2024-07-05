@@ -1,0 +1,177 @@
+image:
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/nebula-backend-springboot
+  tag: "e0df41c9-1.0.0-C4f979aa"
+centos:
+  name: centos
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/centos
+  tag: "centos8.4.2105"
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+livenessProbe:
+  failureThreshold: 30
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+readinessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+serviceAccount:
+  create: true
+  name: "nebula-backend-java"
+  rolebinding:
+    create: true
+    # admin/edit/view
+    clusterrole: "admin"
+extraVolumes:
+  - name: app-logs
+    emptyDir: { }
+  - name: nebula-backend-knowledge
+    persistentVolumeClaim:
+      claimName: nebula-backend-knowledge-pvc
+extraVolumeMounts:
+  - name: app-logs
+    mountPath: /app/logs
+  - name: nebula-backend-knowledge
+    mountPath: /opt/knowledge
+application:
+  environment:
+    - name: JAVA_OPS
+      value: "-Xmx8192m -Xms1024m"
+    - name: MINIO_HOST
+      value: "my-minio.middleware-nebula-stable"
+    - name: MINIO_PORT
+      value: "9000"
+    - name: MINIO_ACCESS_KEY
+      value: "********"
+    - name: MINIO_ACCESS_SECRET
+      value: "********"
+    - name: MINIO_ACCESS_BUCKET
+      value: "algorithm-minio-unit-test"
+secret:
+  application: |-
+    server:
+      port: 8080
+    spring:
+      datasource:
+        url: jdbc:mysql://my-mariadb.middleware-nebula-stable:3306/nebula
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        username: "********"
+        password: "********"
+      jpa:
+        database-platform: org.hibernate.dialect.MySQL57Dialect
+        hibernate:
+          ddl-auto: validate
+        generate-ddl: true
+        properties:
+          hibernate:
+            enable_lazy_load_no_trans: true
+            show_sql: false
+      servlet:
+        multipart:
+          max-file-size: 1GB
+          max-request-size: 1GB
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "health"
+      endpoint:
+        health:
+          probes:
+            enabled: true
+      health:
+        cassandra:
+          enabled: false
+    application:
+      local:
+        cache:
+          path: /tmp/local-cache/file
+      knowledge:
+        graph:
+          repository:
+            tdb:
+              local:
+                directory: /opt/knowledge/graph/knowledge/tdb
+      knowledgeGraphConstruction:
+        tdbLocalDirectory: /opt/knowledge/graph/knowledge/tdb
+        minio:
+          bucket: knowledge-graph
+      knowledgeGraph:
+        tdbLocalDirectory: /opt/knowledge/knowledge-graph/tdb
+        dataset:
+          driver: Postgres
+          host: my-postgresql.middleware-nebula-stable
+          port: 5432
+          username: "********"
+          password: "********"
+        minio:
+          bucket: knowledge-graph
+      minio:
+        schema: "${MINIO_SCHEMA:http}"
+        host: "${MINIO_HOST:api-minio-show.lab.zjvis.net}"
+        port: "${MINIO_PORT:32080}"
+        endpoint: "${application.minio.schema}://${application.minio.host}:${application.minio.port}"
+        accessKey: "${MINIO_ACCESS_KEY:admin}"
+        accessSecret: "${MINIO_ACCESS_SECRET:********}"
+        bucket: "${MINIO_ACCESS_BUCKET:local-test}"
+      initializer:
+        databaseUserCreatorList:
+          - create: ${CREATE_TEST_USER:true}
+            username: ${TEST_USERNAME:test}
+            password: ${TEST_PASSWORD:test}
+            roleList:
+              - USER
+          - create: ${CREATE_ADMIN_USER:true}
+            username: ${ADMIN_USERNAME:admin}
+            password: ${ADMIN_PASSWORD:admin}
+            roleList:
+              - USER
+              - ADMIN
+      dingtalk:
+        app:
+          authUrlPrefix: "${DING_TALK_APP_AUTH_URL_PREFIX:https://login.dingtalk.com/oauth2/auth}"
+          protocol: ${DING_TALK_APP_PROTOCOL:https}
+          regionId: ${DING_TALK_APP_REGION_ID:central}
+          key: "${DING_TALK_APP_KEY:********}"
+          secret: "${DING_TALK_APP_SECRET:********}"
+        callback:
+          server:
+            schema: ${DING_TALK_URL_SCHEMA:http}
+            host: ${DING_TALK_URL_HOST:localhost}
+            port: ${DING_TALK_URL_PORT:8080}
+          path:
+            login: ${DING_TALK_LOGIN_CALL_BACK_PATH:/user/ding-talk-user/login-call-back}
+            verify: ${DING_TALK_VERIFY_CALL_BACK_PATH:/user/ding-talk-user/verify-call-back}
+      login:
+        path:
+          database: /user/login
+          dingtalk: /user/ding-talk-user/login
+          aiworks: /user/aiworks/login
+        nebula:
+          key:
+            private: MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAJq_ftH837grDPPd0Uh8CrHqLFTVJ0GhffBF785PWz3A3ZO8_T3raGHGAgMgLeGO3Al2uh2nk9_GQFf8SdlIi40kF0B4AgdI6kINvRNVLxjD64gtAbMX36myd4FYVU_wW8PJw6n3AusCyQOBqLiltlB32qxOl2flXZaVsQi2K1MfAgMBAAECgYA-fqWV4lzrQJ-bgPJ7JnUfQuYiYG7ZJ4H33hapqAy-FLynZISVVBO0oMXBQ2akGBCu1b72KO4kSilEH0Qntw98D3Kg1CLWXqBmejqeCu12oeXbpIFtZbLL3KGmydZRVzVeEGcjwhyco7JQ7szMn29cmRHVKyEh_djsjJH12EJkaQJBAOMrH4EEV9RlliwJc811xVUvdZGQsnNVbqiOkLCa___Clgh2FGXCUaMM_3EZGkAeipBOb0RPwN49n6RNcRxEATsCQQCuY2Cck43-Zp5BvPvC2LeYvzYDsKrWY8b-mQ-mi_XWDOWe0aPovtiSEfV8uvTvCcMiTbkoNBV_K4xgh6gZp5dtAkBamCAAO9MrCThSZ5KfJZCE4GBqpOIFzNRMtE5PoADn5poe1bhcvJoCBHT6jaBCYeuwkRcejw_DkZ_QznGFbDlxAkBTqWeDFqMLho2r-g9KVhAWnr06HfqHqgygvius-f5xt3Q9slORaGWcBjOgqEyzlRphjaojqIEbpnfNI6e4zxctAkAgXZYXrrELsAOmFXx4VN3IbDB3VVhv5G6KtH-ljOheTbW4AGTnIBzGA5T0sWx8jKQR6k0CqVaweVM8GrCYkUs1
+          salt: abcdefg
+          code:
+            timeout: 3600000
+      aiworks:
+        database:
+          url: jdbc:mysql://my-mariadb.middleware-nebula-stable:3306/aiworks?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useAffectedRows=true&serverTimezone=Asia/Shanghai&useSSL=false
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          username: "********"
+          password: "********"
+    algorithm:
+      url: http://nebula-algorithms-flask.nebula-stable:8080/algorithms/invoke
+      dynamicServerInnerHost: "nebula-backend-java.nebula-stable:8080"
+      dynamicServerOuterHost: "nebula-stable.lab.zjvis.net"

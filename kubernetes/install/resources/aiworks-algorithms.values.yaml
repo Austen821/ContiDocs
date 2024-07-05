@@ -1,0 +1,81 @@
+image:
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/aiworks-algorithms-flask
+  tag: "379b3091e-1.0.0-C4f979aa"
+centos:
+  name: centos
+  repository: docker-registry-ops.lab.zjvis.net:32443/docker.io/centos
+  tag: "centos8.4.2105"
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+livenessProbe:
+  failureThreshold: 30
+  httpGet:
+    path: /healthy/liveness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+readinessProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /healthy/readiness
+    port: 8080
+    scheme: HTTP
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+extraVolumes:
+  - name: app-logs
+    emptyDir: { }
+  - name: gams-license
+    persistentVolumeClaim:
+      claimName: aiworks-algorithms-gamslice-pvc
+  - name: file-models
+    persistentVolumeClaim:
+      claimName: aiworks-algorithms-filemodels-pvc
+extraVolumeMounts:
+  - name: app-logs
+    mountPath: /app/logs
+  - name: gams-license
+    mountPath: /opt/gams
+  - name: file-models
+    mountPath: /opt/file_models
+extraEnv:
+  - name: PATH
+    value: /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/gams/gams36.2_linux_x64_64_sfx
+secret:
+  mountPath: "/app/config/config.yaml"
+  application: |-
+    mysql:
+      url: jdbc:mysql://my-mariadb.middleware-nebula-stable:3306/aiworks
+      host: my-mariadb.middleware-nebula-stable
+      port: 3306
+      user: "********"
+      password: "********"
+      dbname: aiworks
+      driver: com.mysql.cj.jdbc.Driver
+    gp:
+      url: jdbc:postgresql://my-postgresql.middleware-nebula-stable:5432/aiworks
+      host: my-postgresql.middleware-nebula-stable
+      port: 5432
+      user: "********"
+      password: "********"
+      dbname: aiworks
+      driver: org.postgresql.Driver
+    minio:
+      address: http://my-minio.middleware-nebula-stable:9000
+      access_key: "********"
+      secret_key: "********"
+      connection: client
+    metrics_path_tmp: ml_model.
+    insight_server: https://jianwei.zjvis.net/api
+    model:
+      path: static/model_demo
+    database:
+      OLTP: mysql
+      OLAP: greenplum
+    am_warehouse: /opt/file_models/
+    log_path: /app/logs

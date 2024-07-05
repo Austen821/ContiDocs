@@ -1,0 +1,1 @@
+[aiworks-frontend.kg-application.values.yaml](aiworks-frontend.kg-application.values.yaml ':include')
