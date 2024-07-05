@@ -18,3 +18,8 @@
 * [commands](commands.md)
 * [basic mirrors](mirrors/README.md)
 * [zjvis-node](other/zjvis-node.md)
+
+## manual
+* [jasypt 密码编译](manual/jasypt.md)
+* [reposync repo源同步](manual/reposync.md)
+* [minio 备份](manual/minio.md)
