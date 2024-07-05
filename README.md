@@ -1,15 +1,24 @@
 <p style="text-align: center; font-size: xx-large; font-weight: bolder;">Welcome to ContiDocs</p>
 
-## Technology stack
-* [Linux](linux/README.md)
-* [Database](database/README.md)
-* [Language](language/README.md)
-* [Hadoop](hadoop/README.md)
-* [Docker](docker/README.md)
-* [Kubernetes](kubernetes/README.md)
+## Basics
+* [Linux](basics/linux/README.md)
+* [Database](basics/database/README.md)
+* [Docker](basics/docker/README.md)
+* [Kubernetes](basics/kubernetes/README.md)
+* [Commands](basics/commands/README.md)
 
-## Shortcut tools
-* [Commands](shortcutTools/commands.md)
+## Developer
+* [Java](developer/java/README.md)
+* [Python](developer/python/README.md)
+* [Golang](developer/golang/README.md)
+* [F2E](developer/F2E/README.md)
+
+## Product
+* TODO: [Kafka](product/kafka/README.md)
+* TODO: [ClickHouse](product/clickhouser/README.md)
+
+## Grocery
+* [11408](grocery/README.md)
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
