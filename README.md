@@ -15,7 +15,6 @@
 
 ## Product
 * TODO: [Kafka](product/kafka/README.md)
-* TODO: [ClickHouse](product/clickhouser/README.md)
 
 ## Grocery
 * [11408](grocery/README.md)
@@ -23,4 +22,3 @@
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 <p style="text-align: center; font-weight: bolder;">不积跬步，无以至千里；不积小流，无以成江海</p>
-<p style="text-align: center" ><a href="https://beian.miit.gov.cn">冀ICP备2021028814号</a></p>
