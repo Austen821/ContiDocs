@@ -7,4 +7,3 @@
 * [Python](developer/python/README.md)
 * [Golang](developer/golang/README.md)
 * [F2E](developer/F2E/README.md)
-* [11408](grocery/README.md)

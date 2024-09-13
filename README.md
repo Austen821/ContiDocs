@@ -17,7 +17,8 @@
 * TODO: [Kafka](product/kafka/README.md)
 
 ## Grocery
-* [11408](grocery/README.md)
+* [11408](grocery/11408/README.md)
+* [renovation](grocery/renovation/README.md)
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
